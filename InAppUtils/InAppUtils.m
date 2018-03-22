@@ -232,10 +232,8 @@ RCT_EXPORT_METHOD(receiptData:(RCTResponseSenderBlock)callback)
                 SKProductSubscriptionPeriod *period = item.subscriptionPeriod;
                 if (period) {
                     subscriptionPeriod = @{
-                                           @"subscriptionPeriod" : @{
-                                                   @"unit" : period.unitString,
-                                                   @"numberOfUnits" : @(period.numberOfUnits)
-                                                   }
+                                           @"unit" : period.unitString,
+                                           @"numberOfUnits" : @(period.numberOfUnits)
                                            };
                     
                 }
