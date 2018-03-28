@@ -11,6 +11,8 @@
 		46E694381B289730000B634E /* InAppUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 46E694371B289730000B634E /* InAppUtils.m */; };
 		46E6943E1B289730000B634E /* libInAppUtils.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 46E694321B289730000B634E /* libInAppUtils.a */; };
 		46E694841B28E42F000B634E /* SKProduct+StringPrice.m in Sources */ = {isa = PBXBuildFile; fileRef = 46E694831B28E42F000B634E /* SKProduct+StringPrice.m */; };
+		9E4AC98E206B865B001EEEB1 /* SKProductDiscount+InAppUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4AC98A206B865B001EEEB1 /* SKProductDiscount+InAppUtils.m */; };
+		9E4AC98F206B865B001EEEB1 /* SKProductSubscriptionPeriod+InAppUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4AC98C206B865B001EEEB1 /* SKProductSubscriptionPeriod+InAppUtils.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +46,10 @@
 		46E694431B289730000B634E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		46E694821B28E404000B634E /* SKProduct+StringPrice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SKProduct+StringPrice.h"; sourceTree = "<group>"; };
 		46E694831B28E42F000B634E /* SKProduct+StringPrice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SKProduct+StringPrice.m"; sourceTree = "<group>"; };
+		9E4AC98A206B865B001EEEB1 /* SKProductDiscount+InAppUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SKProductDiscount+InAppUtils.m"; sourceTree = "<group>"; };
+		9E4AC98B206B865B001EEEB1 /* SKProductSubscriptionPeriod+InAppUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SKProductSubscriptionPeriod+InAppUtils.h"; sourceTree = "<group>"; };
+		9E4AC98C206B865B001EEEB1 /* SKProductSubscriptionPeriod+InAppUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SKProductSubscriptionPeriod+InAppUtils.m"; sourceTree = "<group>"; };
+		9E4AC98D206B865B001EEEB1 /* SKProductDiscount+InAppUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SKProductDiscount+InAppUtils.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +92,10 @@
 		46E694341B289730000B634E /* InAppUtils */ = {
 			isa = PBXGroup;
 			children = (
+				9E4AC98D206B865B001EEEB1 /* SKProductDiscount+InAppUtils.h */,
+				9E4AC98A206B865B001EEEB1 /* SKProductDiscount+InAppUtils.m */,
+				9E4AC98B206B865B001EEEB1 /* SKProductSubscriptionPeriod+InAppUtils.h */,
+				9E4AC98C206B865B001EEEB1 /* SKProductSubscriptionPeriod+InAppUtils.m */,
 				46E694351B289730000B634E /* InAppUtils.h */,
 				46E694371B289730000B634E /* InAppUtils.m */,
 				46E694821B28E404000B634E /* SKProduct+StringPrice.h */,
@@ -200,6 +210,8 @@
 			files = (
 				46E694841B28E42F000B634E /* SKProduct+StringPrice.m in Sources */,
 				46E694381B289730000B634E /* InAppUtils.m in Sources */,
+				9E4AC98F206B865B001EEEB1 /* SKProductSubscriptionPeriod+InAppUtils.m in Sources */,
+				9E4AC98E206B865B001EEEB1 /* SKProductDiscount+InAppUtils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

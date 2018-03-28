@@ -221,7 +221,7 @@ RCT_EXPORT_METHOD(receiptData:(RCTResponseSenderBlock)callback)
                                           @"numberOfPeriods": @(discount.numberOfPeriods),
                                           @"paymentMode": discount.paymentModeString,
                                           @"price" : discount.price,
-                                          @"priceString" : discount.priceString,
+                                          @"priceString" : [discount priceStringWithLocale:item.priceLocale],
                                           @"subscriptionPeriod" : @{
                                                   @"unit" : discount.subscriptionPeriod.unitString,
                                                   @"numberOfUnits" : @(discount.subscriptionPeriod.numberOfUnits)
