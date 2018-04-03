@@ -98,7 +98,7 @@ RCT_EXPORT_METHOD(purchaseProduct:(NSString *)productIdentifier
             break;
         }
     }
-
+    
     if(product) {
         SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:product];
         if(username) {
@@ -141,9 +141,9 @@ restoreCompletedTransactionsFailedWithError:(NSError *)error
         NSMutableArray *productsArrayForJS = [NSMutableArray array];
         for(SKPaymentTransaction *transaction in queue.transactions){
             if(transaction.transactionState == SKPaymentTransactionStateRestored) {
-
+                
                 NSDictionary *purchase = [self getPurchaseData:transaction];
-
+                
                 [productsArrayForJS addObject:purchase];
                 [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
             }
@@ -155,6 +155,14 @@ restoreCompletedTransactionsFailedWithError:(NSError *)error
     }
 }
 
+RCT_EXPORT_METHOD(refreshReceipt:(RCTResponseSenderBlock)callback)
+{
+    SKReceiptRefreshRequest *refreshReceiptRequest = [[SKReceiptRefreshRequest alloc] init];
+    refreshReceiptRequest.delegate = self;
+    _callbacks[RCTKeyForInstance(refreshReceiptRequest)] = callback;
+    [refreshReceiptRequest start];
+}
+
 RCT_EXPORT_METHOD(restorePurchases:(RCTResponseSenderBlock)callback)
 {
     NSString *restoreRequest = @"restoreRequest";
@@ -163,7 +171,7 @@ RCT_EXPORT_METHOD(restorePurchases:(RCTResponseSenderBlock)callback)
 }
 
 RCT_EXPORT_METHOD(restorePurchasesForUser:(NSString *)username
-                    callback:(RCTResponseSenderBlock)callback)
+                  callback:(RCTResponseSenderBlock)callback)
 {
     NSString *restoreRequest = @"restoreRequest";
     _callbacks[RCTKeyForInstance(restoreRequest)] = callback;
@@ -195,9 +203,9 @@ RCT_EXPORT_METHOD(receiptData:(RCTResponseSenderBlock)callback)
     NSURL *receiptUrl = [[NSBundle mainBundle] appStoreReceiptURL];
     NSData *receiptData = [NSData dataWithContentsOfURL:receiptUrl];
     if (!receiptData) {
-      callback(@[@"not_available"]);
+        callback(@[@"not_available"]);
     } else {
-      callback(@[[NSNull null], [receiptData base64EncodedStringWithOptions:0]]);
+        callback(@[[NSNull null], [receiptData base64EncodedStringWithOptions:0]]);
     }
 }
 
@@ -225,7 +233,7 @@ RCT_EXPORT_METHOD(receiptData:(RCTResponseSenderBlock)callback)
                                           @"subscriptionPeriod" : @{
                                                   @"unit" : discount.subscriptionPeriod.unitString,
                                                   @"numberOfUnits" : @(discount.subscriptionPeriod.numberOfUnits)
-                                                }
+                                                  }
                                           };
                 }
                 
@@ -258,6 +266,19 @@ RCT_EXPORT_METHOD(receiptData:(RCTResponseSenderBlock)callback)
         [_callbacks removeObjectForKey:key];
     } else {
         RCTLogWarn(@"No callback registered for load product request.");
+    }
+}
+
+- (void)requestDidFinish:(SKRequest *)request
+{
+    if([request isKindOfClass:[SKReceiptRefreshRequest class]]) {
+        NSString *key = RCTKeyForInstance(request);
+        RCTResponseSenderBlock callback = _callbacks[key];
+        
+        if(callback) {
+            callback(@[[NSNull null]]);
+            [_callbacks removeObjectForKey:key];
+        }
     }
 }
 
@@ -301,3 +322,4 @@ static NSString *RCTKeyForInstance(id instance)
 }
 
 @end
+
