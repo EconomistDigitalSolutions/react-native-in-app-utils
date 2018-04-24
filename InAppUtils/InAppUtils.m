@@ -6,16 +6,24 @@
 #import "SKProductDiscount+InAppUtils.h"
 #import "SKProductSubscriptionPeriod+InAppUtils.h"
 
+NSString * const PromotedProductPurchasingEventName = @"PromotedProductPurchasing";
+NSString * const PromotedProductPurchasedEventName = @"PromotedProductPurchased";
+NSString * const PromotedProductPurchaseFailedEventName = @"PromotedProductPurchaseFailed";
+NSString * const PromotedProductPurchaseCancelledEventName = @"PromotedProductPurchaseCancelled";
+
 @implementation InAppUtils
 {
     NSArray *products;
     NSMutableDictionary *_callbacks;
+    NSArray *_promotedProductIds;
+    BOOL _promotedPurchase;
 }
 
 - (instancetype)init
 {
     if ((self = [super init])) {
         _callbacks = [[NSMutableDictionary alloc] init];
+        _promotedPurchase = YES;
         [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
     }
     return self;
@@ -28,6 +36,37 @@
 
 RCT_EXPORT_MODULE()
 
+- (NSArray<NSString *> *)supportedEvents
+{
+    return @[
+             PromotedProductPurchasingEventName,
+             PromotedProductPurchasedEventName,
+             PromotedProductPurchaseFailedEventName,
+             PromotedProductPurchaseCancelledEventName
+             ];
+}
+
+RCT_EXPORT_METHOD(setAllowedPromotedProducts:(NSArray*)productIdentifiers)
+{
+    _promotedProductIds = [NSArray arrayWithArray:productIdentifiers];
+}
+
+- (BOOL)paymentQueue:(SKPaymentQueue *)queue shouldAddStorePayment:(SKPayment *)payment forProduct:(SKProduct *)product
+{
+    if ([_promotedProductIds containsObject:product.productIdentifier]) {
+        return YES;
+    }
+    
+    // emit error that transaction has been cancelled
+    // If you canceled the transaction, provide feedback to the user.
+    [self sendEventWithName:PromotedProductPurchaseCancelledEventName
+                       body:@{ @"productIdentifier" : product.productIdentifier,
+                               @"error" : RCTJSErrorFromNSError(RCTErrorWithMessage(@"Purchase Cancelled"))
+                               }];
+    
+    return NO;
+}
+
 - (void)paymentQueue:(SKPaymentQueue *)queue
  updatedTransactions:(NSArray *)transactions
 {
@@ -39,6 +78,12 @@ RCT_EXPORT_MODULE()
                 if (callback) {
                     callback(@[RCTJSErrorFromNSError(transaction.error)]);
                     [_callbacks removeObjectForKey:key];
+                } else if (_promotedPurchase) {
+                    [self sendEventWithName:PromotedProductPurchaseFailedEventName
+                                       body:@{
+                                              @"error" : RCTJSErrorFromNSError(transaction.error),
+                                              @"productIdentifier" : transaction.payment.productIdentifier
+                                              }];
                 } else {
                     RCTLogWarn(@"No callback registered for transaction with state failed.");
                 }
@@ -52,6 +97,10 @@ RCT_EXPORT_MODULE()
                     NSDictionary *purchase = [self getPurchaseData:transaction];
                     callback(@[[NSNull null], purchase]);
                     [_callbacks removeObjectForKey:key];
+                } else if (_promotedPurchase) {
+                    NSDictionary *purchase = [self getPurchaseData:transaction];
+                    [self sendEventWithName:PromotedProductPurchasedEventName
+                                       body:purchase];
                 } else {
                     RCTLogWarn(@"No callback registered for transaction with state purchased.");
                 }
@@ -63,6 +112,11 @@ RCT_EXPORT_MODULE()
                 break;
             case SKPaymentTransactionStatePurchasing:
                 NSLog(@"purchasing");
+                if (_promotedPurchase) {
+                    // notify JS about purchase start
+                    [self sendEventWithName:PromotedProductPurchasingEventName
+                                       body:@{ @"productIdentifier" : transaction.payment.productIdentifier }];
+                }
                 break;
             case SKPaymentTransactionStateDeferred:
                 NSLog(@"deferred");
@@ -90,6 +144,8 @@ RCT_EXPORT_METHOD(purchaseProduct:(NSString *)productIdentifier
                   username:(NSString *)username
                   callback:(RCTResponseSenderBlock)callback
 {
+    _promotedPurchase = NO;
+    
     SKProduct *product;
     for(SKProduct *p in products)
     {
@@ -293,11 +349,14 @@ RCT_EXPORT_METHOD(receiptData:(RCTResponseSenderBlock)callback)
 }
 
 - (NSDictionary *)getPurchaseData:(SKPaymentTransaction *)transaction {
+    NSURL *receiptUrl = [[NSBundle mainBundle] appStoreReceiptURL];
+    NSData *receiptData = [NSData dataWithContentsOfURL:receiptUrl];
+    
     NSMutableDictionary *purchase = [NSMutableDictionary dictionaryWithDictionary: @{
                                                                                      @"transactionDate": @(transaction.transactionDate.timeIntervalSince1970 * 1000),
                                                                                      @"transactionIdentifier": transaction.transactionIdentifier,
                                                                                      @"productIdentifier": transaction.payment.productIdentifier,
-                                                                                     @"transactionReceipt": [[transaction transactionReceipt] base64EncodedStringWithOptions:0]
+                                                                                     @"transactionReceipt": receiptData ? [receiptData base64EncodedStringWithOptions:0] : [NSNull null]
                                                                                      }];
     // originalTransaction is available for restore purchase and purchase of cancelled/expired subscriptions
     SKPaymentTransaction *originalTransaction = transaction.originalTransaction;
